@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZOU Student Helpdesk — Live Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root, body[data-theme="light"]{
+    --ink:#152238; --ink-2:#2b3d5c; --slate:#5b6c8a; --line:#dfe4ee;
+    --bg:#f5f6f9; --panel:#ffffff; --panel-border:#dfe4ee;
+    --gold:#c8952e; --red:#b3413a; --green:#2f7d55; --blue:#3a6ea5;
+    --chart-grid:rgba(21,34,56,0.08);
+    --radius:10px;
+  }
+  body[data-theme="navy"]{
+    --ink:#eef1f8; --ink-2:#c7d2e8; --slate:#93a3c4; --line:#28395c;
+    --bg:#0f1b33; --panel:#16244a; --panel-border:#26385f;
+    --gold:#e0ac48; --red:#e07369; --green:#4bb383; --blue:#6ea3e0;
+    --chart-grid:rgba(238,241,248,0.08);
+  }
+  body[data-theme="dark"]{
+    --ink:#e9e9ee; --ink-2:#c2c2cc; --slate:#8a8a99; --line:#2b2b35;
+    --bg:#121216; --panel:#1a1a20; --panel-border:#2b2b35;
+    --gold:#e0ac48; --red:#e0736b; --green:#4bb383; --blue:#6ea3e0;
+    --chart-grid:rgba(233,233,238,0.08);
+  }
+  body[data-theme="contrast"]{
+    --ink:#000000; --ink-2:#000000; --slate:#333333; --line:#000000;
+    --bg:#ffffff; --panel:#ffffff; --panel-border:#000000;
+    --gold:#8a5a00; --red:#a30000; --green:#00641e; --blue:#00408a;
+    --chart-grid:rgba(0,0,0,0.15);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;transition:background .25s ease,color .25s ease;}
+  body{padding:22px 28px 30px;}
+  h1,h2{font-family:'Source Serif 4',serif;margin:0;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;border-bottom:2px solid var(--ink);padding-bottom:14px;}
+  .topbar h1{font-size:26px;color:var(--ink);font-weight:600;}
+  .topbar .sub{display:flex;align-items:center;gap:10px;color:var(--slate);font-size:13px;margin-top:6px;}
+  .clock{text-align:right;}
+  .clock .time{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .clock .date{font-size:12px;color:var(--slate);}
+
+  .status-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:20px;font-size:11.5px;font-weight:600;letter-spacing:.2px;border:1px solid var(--panel-border);background:var(--panel);}
+  .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;}
+  .status-badge.live .status-dot{background:var(--green);animation:pulse 2.5s infinite;}
+  .status-badge.demo .status-dot{background:var(--gold);}
+  .status-badge.error .status-dot{background:var(--red);animation:pulse 1s infinite;}
+  .status-badge.live{color:var(--green);}
+  .status-badge.demo{color:var(--gold);}
+  .status-badge.error{color:var(--red);}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+  .kpi{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius);padding:16px 18px;border-top:4px solid var(--ink-2);box-shadow:0 1px 2px rgba(0,0,0,.04);transition:background .25s ease,border-color .25s ease,transform .15s ease;}
+  .kpi.open{border-top-color:var(--blue);}
+  .kpi.overdue{border-top-color:var(--red);}
+  .kpi.pending{border-top-color:var(--gold);}
+  .kpi.resolved{border-top-color:var(--green);}
+  .kpi .num{font-size:36px;font-weight:800;line-height:1;font-family:'Source Serif 4',serif;}
+  .kpi .label{font-size:12.5px;color:var(--slate);margin-top:6px;font-weight:600;letter-spacing:.3px;}
+
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .panel{position:relative;background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--radius);padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:background .25s ease,border-color .25s ease;}
+  .panel h2{font-size:14.5px;font-weight:600;margin-bottom:10px;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center;}
+  .panel .stale-flag{font-size:10px;font-weight:600;color:var(--red);opacity:0;transition:opacity .2s;}
+  .panel.stale .stale-flag{opacity:1;}
+  .span2{grid-column:span 2;}
+  .span4{grid-column:span 4;}
+  canvas{max-height:190px;}
+  .row-metrics{display:flex;gap:22px;flex-wrap:wrap;}
+  .metric{flex:1;min-width:120px;}
+  .metric .val{font-size:26px;font-weight:800;font-family:'Source Serif 4',serif;}
+  .metric .lbl{font-size:11.5px;color:var(--slate);margin-top:2px;}
+  .footer{margin-top:18px;text-align:center;color:var(--slate);font-size:11.5px;}
+  .refresh-spinner{display:inline-block;width:9px;height:9px;border-radius:50%;border:2px solid var(--panel-border);border-top-color:var(--blue);margin-right:5px;vertical-align:-1px;opacity:0;transition:opacity .15s;}
+  .refresh-spinner.active{opacity:1;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  @media (max-width: 1100px){
+    .kpis, .grid{grid-template-columns:repeat(2,1fr);}
+    .span2, .span4{grid-column:span 2;}
+  }
+  @media (max-width: 640px){
+    body{padding:14px;}
+    .kpis, .grid{grid-template-columns:1fr;}
+    .span2, .span4{grid-column:span 1;}
+    .topbar{flex-direction:column;align-items:flex-start;gap:10px;}
+  }
+
+  /* Skeleton loading state, shown until the first successful fetch */
+  .skeleton .num, .skeleton .val{color:transparent!important;position:relative;border-radius:4px;overflow:hidden;background:var(--line);}
+  .skeleton .num::after, .skeleton .val::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);animation:shimmer 1.4s infinite;}
+  body[data-theme="dark"] .skeleton .num::after, body[data-theme="navy"] .skeleton .num::after,
+  body[data-theme="dark"] .skeleton .val::after, body[data-theme="navy"] .skeleton .val::after{background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);}
+  @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+  canvas.skeleton-canvas{opacity:.15;}
+
+  .theme-switch{display:flex;gap:6px;margin-left:18px;}
+  .theme-switch button{
+    width:22px;height:22px;border-radius:50%;border:2px solid var(--panel-border);
+    cursor:pointer;padding:0;opacity:.7;transition:opacity .15s,transform .15s;
+  }
+  .theme-switch button:hover{opacity:1;transform:scale(1.1);}
+  .theme-switch button.active{opacity:1;border-color:var(--ink);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--ink);}
+  .theme-switch button[data-theme="light"]{background:#f5f6f9;}
+  .theme-switch button[data-theme="navy"]{background:#16244a;}
+  .theme-switch button[data-theme="dark"]{background:#1a1a20;}
+  .theme-switch button[data-theme="contrast"]{background:#ffffff;border-color:#000;}
+</style>
+</head>
+<body data-theme="navy">
+
+<div class="topbar">
+  <div>
+    <h1>Student Helpdesk — Live Operations Dashboard</h1>
+    <div class="sub">
+      <span class="status-badge demo" id="statusBadge"><span class="status-dot"></span><span id="statusText">Connecting…</span></span>
+      <span>Auto-refreshing every 45s · view-only · aggregate statistics only</span>
+    </div>
+  </div>
+  <div style="display:flex;align-items:flex-end;">
+    <div class="clock">
+      <div class="time" id="clockTime">--:--:--</div>
+      <div class="date" id="clockDate">—</div>
+    </div>
+    <div class="theme-switch" id="themeSwitch" title="Theme">
+      <button data-theme="light" aria-label="Light theme" title="Light"></button>
+      <button data-theme="navy" aria-label="Navy theme" title="Navy"></button>
+      <button data-theme="dark" aria-label="Dark theme" title="Dark"></button>
+      <button data-theme="contrast" aria-label="High contrast theme" title="High Contrast"></button>
+    </div>
+  </div>
+</div>
+
+<div class="kpis" id="panelKpis">
+  <div class="kpi open skeleton" id="kpiOpen"><div class="num" id="kOpen">0</div><div class="label">OPEN TICKETS</div></div>
+  <div class="kpi overdue skeleton" id="kpiOverdue"><div class="num" id="kOverdue">0</div><div class="label">OVERDUE</div></div>
+  <div class="kpi pending skeleton" id="kpiPending"><div class="num" id="kPending">0</div><div class="label">PENDING (AWAITING STUDENT)</div></div>
+  <div class="kpi resolved skeleton" id="kpiResolved"><div class="num" id="kResolved">0</div><div class="label">RESOLVED</div></div>
+</div>
+
+<div class="grid">
+  <div class="panel span2" id="panelVolume">
+    <h2>Ticket Volume <span class="stale-flag">⚠ no data</span></h2>
+    <div class="row-metrics">
+      <div class="metric skeleton"><div class="val" id="vToday">0</div><div class="lbl">Today</div></div>
+      <div class="metric skeleton"><div class="val" id="vWeek">0</div><div class="lbl">This Week</div></div>
+      <div class="metric skeleton"><div class="val" id="vMonth">0</div><div class="lbl">This Month</div></div>
+    </div>
+  </div>
+
+  <div class="panel span2" id="panelAssign">
+    <h2>Assigned vs Unassigned <span class="stale-flag">⚠ no data</span></h2>
+    <canvas id="chAssign" class="skeleton-canvas"></canvas>
+  </div>
+
+  <div class="panel span4" id="panelDaily">
+    <h2>Daily Ticket Volume — Last 14 Days <span class="stale-flag">⚠ no data</span></h2>
+    <canvas id="chDaily" class="skeleton-canvas"></canvas>
+  </div>
+
+  <div class="panel span2" id="panelHourly">
+    <h2>Hourly Ticket Volume — Last 24h <span class="stale-flag">⚠ no data</span></h2>
+    <canvas id="chHourly" class="skeleton-canvas"></canvas>
+  </div>
+
+  <div class="panel span2" id="panelResponse">
+    <h2>Response & Resolution / SLA <span class="stale-flag">⚠ no data</span></h2>
+    <div class="row-metrics">
+      <div class="metric skeleton"><div class="val" id="rFirst">0</div><div class="lbl">Avg first response (min)</div></div>
+      <div class="metric skeleton"><div class="val" id="rRes">0</div><div class="lbl">Avg resolution (hrs)</div></div>
+      <div class="metric skeleton"><div class="val" id="rSla">0</div><div class="lbl">SLA compliance</div></div>
+    </div>
+  </div>
+
+  <div class="panel span2" id="panelDept">
+    <h2>Tickets by Department <span class="stale-flag">⚠ no data</span></h2>
+    <canvas id="chDept" class="skeleton-canvas"></canvas>
+  </div>
+
+  <div class="panel span2" id="panelCat">
+    <h2>Tickets by Category <span class="stale-flag">⚠ no data</span></h2>
+    <canvas id="chCat" class="skeleton-canvas"></canvas>
+  </div>
+
+  <div class="panel span2" id="panelSource">
+    <h2>Tickets by Source <span class="stale-flag">⚠ no data</span></h2>
+    <canvas id="chSource" class="skeleton-canvas"></canvas>
+  </div>
+
+  <div class="panel span2" id="panelChannel">
+    <h2>AI Chatbot vs Portal-Generated <span class="stale-flag">⚠ no data</span></h2>
+    <canvas id="chChannel" class="skeleton-canvas"></canvas>
+  </div>
+
+  <div class="panel span2" id="panelWorkload">
+    <h2>Agent Workload (open tickets) <span class="stale-flag">⚠ no data</span></h2>
+    <canvas id="chWorkload" class="skeleton-canvas"></canvas>
+  </div>
+
+  <div class="panel span2" id="panelResolvedAgent">
+    <h2>Tickets Resolved per Agent <span class="stale-flag">⚠ no data</span></h2>
+    <canvas id="chResolvedAgent" class="skeleton-canvas"></canvas>
+  </div>
+</div>
+
+<div class="footer"><span class="refresh-spinner" id="refreshSpinner"></span>ZOU Student Affairs · Helpdesk Analytics · Last updated: <span id="lastUpdated">–</span></div>
+
+<script>
+const PALETTE = ['#3a6ea5','#c8952e','#2f7d55','#b3413a','#7a5ea8','#3d8f9d','#8a6d3b','#5b6c8a'];
+const FONT = "Inter, sans-serif";
+Chart.defaults.font.family = FONT;
+const charts = {};
+
+// ---- Theming ----
+const THEMES = ['light','navy','dark','contrast'];
+function cssVar(name){ return getComputedStyle(document.body).getPropertyValue(name).trim(); }
+function themeColors(){ return { text: cssVar('--slate'), grid: cssVar('--chart-grid'), ink: cssVar('--ink') }; }
+
+function applyChartTheme(){
+  const { text, grid } = themeColors();
+  const panelColor = cssVar('--panel');
+  Chart.defaults.color = text;
+  Object.values(charts).forEach(ch => {
+    if(ch.options.scales){
+      Object.values(ch.options.scales).forEach(scale => {
+        scale.grid = scale.grid || {}; scale.grid.color = grid;
+        scale.ticks = scale.ticks || {}; scale.ticks.color = text;
+      });
+    }
+    if(ch.options.plugins && ch.options.plugins.legend && ch.options.plugins.legend.labels){
+      ch.options.plugins.legend.labels.color = text;
+    }
+    if(ch.config && ch.config.type === 'doughnut' && ch.data.datasets[0]){
+      ch.data.datasets[0].borderColor = panelColor;
+    }
+    ch.update('none'); // 'none' = redraw immediately, no animation lag on theme switch
+  });
+}
+
+function setTheme(name, persist=true){
+  if(!THEMES.includes(name)) return;
+  document.body.setAttribute('data-theme', name);
+  document.querySelectorAll('#themeSwitch button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.theme === name);
+  });
+  if(persist) localStorage.setItem('helpdesk-dashboard-theme', name);
+  applyChartTheme();
+}
+
+document.getElementById('themeSwitch').addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-theme]');
+  if(btn) setTheme(btn.dataset.theme);
+});
+
+// Priority: ?theme= in URL > saved preference > default (navy)
+const urlTheme = new URLSearchParams(location.search).get('theme');
+const savedTheme = localStorage.getItem('helpdesk-dashboard-theme');
+setTheme(urlTheme || savedTheme || 'navy', !!urlTheme || false);
+
+function bar(id, labels, values, horizontal=false){
+  const ctx = document.getElementById(id);
+  if(charts[id]){
+    charts[id].data.labels = labels;
+    charts[id].data.datasets[0].data = values;
+    charts[id].update();
+    return;
+  }
+  const { text, grid } = themeColors();
+  charts[id] = new Chart(ctx, {
+    type:'bar',
+    data:{labels, datasets:[{data:values, backgroundColor: labels.map((_,i)=>PALETTE[i%PALETTE.length]), borderRadius:4}]},
+    options:{
+      indexAxis: horizontal ? 'y' : 'x',
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:!horizontal, color:grid}, ticks:{color:text}},
+        y:{grid:{display:horizontal, color:grid}, ticks:{color:text}}
+      },
+      maintainAspectRatio:false
+    }
+  });
+}
+function line(id, labels, values){
+  const ctx = document.getElementById(id);
+  if(charts[id]){
+    charts[id].data.labels = labels;
+    charts[id].data.datasets[0].data = values;
+    charts[id].update();
+    return;
+  }
+  const { text, grid } = themeColors();
+  charts[id] = new Chart(ctx, {
+    type:'line',
+    data:{labels, datasets:[{data:values, borderColor:'#3a6ea5', backgroundColor:'rgba(58,110,165,0.12)', fill:true, tension:0.3, pointRadius:2}]},
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:grid}, ticks:{color:text}},
+        y:{grid:{color:grid}, ticks:{color:text}, beginAtZero:true}
+      },
+      maintainAspectRatio:false
+    }
+  });
+}
+function donut(id, labels, values){
+  const ctx = document.getElementById(id);
+  if(charts[id]){
+    charts[id].data.labels = labels;
+    charts[id].data.datasets[0].data = values;
+    charts[id].update();
+    return;
+  }
+  const { text } = themeColors();
+  charts[id] = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels, datasets:[{data:values, backgroundColor: labels.map((_,i)=>PALETTE[i%PALETTE.length]), borderWidth:2, borderColor: cssVar('--panel')}]},
+    options:{plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:11},color:text}}}, maintainAspectRatio:false, cutout:'62%'}
+  });
+}
+
+// Append the kiosk token (if present in the page URL) to every API call.
+const params = new URLSearchParams(location.search);
+const token = params.get('token');
+function apiUrl(path){ return token ? `${path}?token=${encodeURIComponent(token)}` : path; }
+
+async function getJSON(path){
+  const res = await fetch(apiUrl(path), {cache:'no-store'});
+  if(!res.ok) throw new Error(`${path} -> ${res.status}`);
+  return res.json();
+}
+
+function clearSkeleton(el){ el.classList.remove('skeleton'); }
+function markPanelStale(panelId, isStale){
+  const el = document.getElementById(panelId);
+  if(el) el.classList.toggle('stale', isStale);
+}
+
+// ---- Connection status badge (polls /api/status independently of the panels,
+// so the badge reflects real DB reachability, not just "did fetch throw") ----
+async function refreshStatus(){
+  const badge = document.getElementById('statusBadge');
+  const text = document.getElementById('statusText');
+  try{
+    const s = await getJSON('/api/status');
+    if(s.demo_mode){
+      badge.className = 'status-badge demo';
+      text.textContent = 'Demo Data';
+    } else if(s.db_connected){
+      badge.className = 'status-badge live';
+      text.textContent = 'Live — connected to MySQL';
+    } else {
+      badge.className = 'status-badge error';
+      text.textContent = 'Database unreachable';
+    }
+  }catch(e){
+    badge.className = 'status-badge error';
+    text.textContent = 'Server unreachable';
+  }
+}
+
+// Each panel fetches and renders independently: if one query fails (e.g. a
+// table name doesn't match your osTicket schema yet), the rest of the
+// dashboard keeps working and only that panel flags itself as stale.
+const panels = [
+  { id:'panelKpis', fetch:['summary'], render:([s])=>{
+      document.getElementById('kOpen').textContent = s.open;
+      document.getElementById('kOverdue').textContent = s.overdue;
+      document.getElementById('kPending').textContent = s.pending;
+      document.getElementById('kResolved').textContent = s.resolved;
+      ['kpiOpen','kpiOverdue','kpiPending','kpiResolved'].forEach(id=>clearSkeleton(document.getElementById(id)));
+    }},
+  { id:'panelVolume', fetch:['volume'], render:([v])=>{
+      document.getElementById('vToday').textContent = v.today;
+      document.getElementById('vWeek').textContent = v.this_week;
+      document.getElementById('vMonth').textContent = v.this_month;
+      document.querySelectorAll('#panelVolume .metric').forEach(clearSkeleton);
+    }},
+  { id:'panelAssign', fetch:['assignment'], render:([a])=>{
+      donut('chAssign', ['Assigned','Unassigned'], [a.assigned, a.unassigned]);
+      document.getElementById('chAssign').classList.remove('skeleton-canvas');
+    }},
+  { id:'panelDaily', fetch:['trends_daily'], render:([d])=>{
+      line('chDaily', d.map(x=>x.date), d.map(x=>x.count));
+      document.getElementById('chDaily').classList.remove('skeleton-canvas');
+    }, endpoint:'trends-daily' },
+  { id:'panelHourly', fetch:['trends_hourly'], render:([h])=>{
+      line('chHourly', h.map(x=>x.hour), h.map(x=>x.count));
+      document.getElementById('chHourly').classList.remove('skeleton-canvas');
+    }, endpoint:'trends-hourly' },
+  { id:'panelResponse', fetch:['response_times','sla_compliance'], render:([r,sla])=>{
+      document.getElementById('rFirst').textContent = r.avg_first_response_minutes;
+      document.getElementById('rRes').textContent = r.avg_resolution_hours;
+      document.getElementById('rSla').textContent = sla.within_sla_pct + '%';
+      document.querySelectorAll('#panelResponse .metric').forEach(clearSkeleton);
+    }, endpoint:['response-times','sla-compliance'] },
+  { id:'panelDept', fetch:['by_department'], render:([d])=>{
+      bar('chDept', d.map(x=>x.label), d.map(x=>x.count), true);
+      document.getElementById('chDept').classList.remove('skeleton-canvas');
+    }, endpoint:'by-department' },
+  { id:'panelCat', fetch:['by_category'], render:([c])=>{
+      bar('chCat', c.map(x=>x.label), c.map(x=>x.count), true);
+      document.getElementById('chCat').classList.remove('skeleton-canvas');
+    }, endpoint:'by-category' },
+  { id:'panelSource', fetch:['by_source'], render:([s])=>{
+      donut('chSource', s.map(x=>x.label), s.map(x=>x.count));
+      document.getElementById('chSource').classList.remove('skeleton-canvas');
+    }, endpoint:'by-source' },
+  { id:'panelChannel', fetch:['channel_mix'], render:([c])=>{
+      donut('chChannel', ['AI Chatbot','Portal / Other'], [c.ai_chatbot, c.portal_and_other]);
+      document.getElementById('chChannel').classList.remove('skeleton-canvas');
+    }, endpoint:'channel-mix' },
+  { id:'panelWorkload', fetch:['agent_workload'], render:([w])=>{
+      bar('chWorkload', w.map(x=>x.agent), w.map(x=>x.open_tickets));
+      document.getElementById('chWorkload').classList.remove('skeleton-canvas');
+    }, endpoint:'agent-workload' },
+  { id:'panelResolvedAgent', fetch:['resolved_per_agent'], render:([r])=>{
+      bar('chResolvedAgent', r.map(x=>x.agent), r.map(x=>x.resolved));
+      document.getElementById('chResolvedAgent').classList.remove('skeleton-canvas');
+    }, endpoint:'resolved-per-agent' },
+];
+
+// Map fetch keys to their API routes where they differ from a simple dash-join
+const ENDPOINTS = {
+  summary:'summary', volume:'volume', assignment:'assignment',
+  trends_daily:'trends-daily', trends_hourly:'trends-hourly',
+  response_times:'response-times', sla_compliance:'sla-compliance',
+  by_department:'by-department', by_category:'by-category', by_source:'by-source',
+  channel_mix:'channel-mix', agent_workload:'agent-workload', resolved_per_agent:'resolved-per-agent',
+};
+
+async function refreshPanel(p){
+  try{
+    const results = await Promise.all(p.fetch.map(key => getJSON('/api/' + ENDPOINTS[key])));
+    p.render(results);
+    markPanelStale(p.id, false);
+    return true;
+  }catch(e){
+    console.error(`panel ${p.id} failed:`, e.message);
+    markPanelStale(p.id, true);
+    return false;
+  }
+}
+
+async function refresh(){
+  const spinner = document.getElementById('refreshSpinner');
+  spinner.classList.add('active');
+  const results = await Promise.allSettled(panels.map(refreshPanel));
+  const failures = results.filter(r => r.status === 'fulfilled' && r.value === false).length;
+  document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString() +
+    (failures ? ` (${failures} panel${failures>1?'s':''} failed to update — see console)` : '');
+  applyChartTheme();
+  refreshStatus();
+  spinner.classList.remove('active');
+}
+
+function tickClock(){
+  const now = new Date();
+  document.getElementById('clockTime').textContent = now.toLocaleTimeString();
+  document.getElementById('clockDate').textContent = now.toLocaleDateString(undefined,{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+}
+setInterval(tickClock, 1000); tickClock();
+
+refresh();
+setInterval(refresh, 45000); // refresh every 45s — within the requested 30–60s window
+</script>
+</body>
+</html>

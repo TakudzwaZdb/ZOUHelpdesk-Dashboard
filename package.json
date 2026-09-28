@@ -1,0 +1,18 @@
+{
+  "name": "zou-helpdesk-dashboard",
+  "version": "1.0.0",
+  "description": "View-only, kiosk-mode analytics dashboard for the ZOU Student Helpdesk (osTicket)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test-db": "node scripts/test-connection.js",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "setup": "npm install && npm run build:frontend"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mysql2": "^3.11.0",
+    "dotenv": "^16.4.5"
+  }
+}

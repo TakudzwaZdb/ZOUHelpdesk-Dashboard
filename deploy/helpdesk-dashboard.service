@@ -1,0 +1,15 @@
+[Unit]
+Description=ZOU Student Helpdesk Analytics Dashboard (Node.js)
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/helpdesk-dashboard
+EnvironmentFile=/opt/helpdesk-dashboard/.env
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

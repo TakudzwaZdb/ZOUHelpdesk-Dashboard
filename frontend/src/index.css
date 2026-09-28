@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+html[data-theme='light'] {
+  --ink: #152238;
+  --ink-2: #2b3d5c;
+  --slate: #5b6c8a;
+  --line: #dfe4ee;
+  --bg: #f5f6f9;
+  --panel: #ffffff;
+  --panel-border: #dfe4ee;
+  --gold: #c8952e;
+  --red: #b3413a;
+  --green: #2f7d55;
+  --blue: #3a6ea5;
+  --chart-grid: rgba(21, 34, 56, 0.08);
+}
+html[data-theme='navy'] {
+  --ink: #eef1f8;
+  --ink-2: #c7d2e8;
+  --slate: #93a3c4;
+  --line: #28395c;
+  --bg: #0f1b33;
+  --panel: #16244a;
+  --panel-border: #26385f;
+  --gold: #e0ac48;
+  --red: #e07369;
+  --green: #4bb383;
+  --blue: #6ea3e0;
+  --chart-grid: rgba(238, 241, 248, 0.08);
+}
+html[data-theme='dark'] {
+  --ink: #e9e9ee;
+  --ink-2: #c2c2cc;
+  --slate: #8a8a99;
+  --line: #2b2b35;
+  --bg: #121216;
+  --panel: #1a1a20;
+  --panel-border: #2b2b35;
+  --gold: #e0ac48;
+  --red: #e0736b;
+  --green: #4bb383;
+  --blue: #6ea3e0;
+  --chart-grid: rgba(233, 233, 238, 0.08);
+}
+html[data-theme='contrast'] {
+  --ink: #000000;
+  --ink-2: #000000;
+  --slate: #333333;
+  --line: #000000;
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --panel-border: #000000;
+  --gold: #8a5a00;
+  --red: #a30000;
+  --green: #00641e;
+  --blue: #00408a;
+  --chart-grid: rgba(0, 0, 0, 0.15);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* Skeleton loading shimmer, used while a panel's first fetch is in flight */
+.skeleton-text {
+  color: transparent !important;
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--line);
+}
+.skeleton-text::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  animation: shimmer 1.4s infinite;
+}
+html[data-theme='dark'] .skeleton-text::after,
+html[data-theme='navy'] .skeleton-text::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

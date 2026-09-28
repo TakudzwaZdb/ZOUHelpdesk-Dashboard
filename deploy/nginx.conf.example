@@ -1,0 +1,32 @@
+# Example: reverse-proxy the dashboard and restrict it to the ZOU internal
+# network / management VLAN. Adjust the `allow` ranges to your real subnets
+# and place this alongside your other server blocks (e.g. under
+# /etc/nginx/sites-available/, then symlink into sites-enabled/).
+
+server {
+    listen 80;
+    server_name helpdesk-dashboard.zou.ac.zw;
+
+    # --- Network restriction (Control #1) ---
+    allow 10.10.0.0/16;      # example: ZOU internal LAN — replace with real range
+    allow 172.16.50.0/24;    # example: management/kiosk VLAN — replace with real range
+    deny all;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Optional: only allow the kiosk PC itself
+    # location / {
+    #     allow 172.16.50.22/32;
+    #     deny all;
+    #     proxy_pass http://127.0.0.1:8080;
+    # }
+}
+
+# For TLS, put this behind certbot/Let's Encrypt or your internal CA and
+# redirect :80 to :443 as usual — internal-only traffic still benefits
+# from encryption on shared campus networks.
