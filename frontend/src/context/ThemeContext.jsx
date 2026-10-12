@@ -1,10 +1,6 @@
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react';
 
-<<<<<<< HEAD
 const THEMES = ['infographic', 'light', 'navy', 'dark', 'contrast'];
-=======
-const THEMES = ['light', 'navy', 'dark', 'contrast'];
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 const STORAGE_KEY = 'helpdesk-dashboard-theme';
 
 const ThemeContext = createContext(null);
@@ -15,11 +11,7 @@ function readInitialTheme() {
   if (urlTheme && THEMES.includes(urlTheme)) return urlTheme;
   const saved = window.localStorage.getItem(STORAGE_KEY);
   if (saved && THEMES.includes(saved)) return saved;
-<<<<<<< HEAD
   return 'infographic';
-=======
-  return 'navy';
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 }
 
 export function ThemeProvider({ children }) {
@@ -29,11 +21,7 @@ export function ThemeProvider({ children }) {
   // component consumes these as normal props, so switching theme simply
   // triggers a normal React re-render — no imperative Chart.js instance
   // walking, no stale references, no ordering bugs.
-<<<<<<< HEAD
   const [chartColors, setChartColors] = useState({ text: '#6f7a99', grid: 'rgba(143,154,184,.1)', panel: '#21222d' });
-=======
-  const [chartColors, setChartColors] = useState({ text: '#5b6c8a', grid: 'rgba(0,0,0,.08)', panel: '#fff' });
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 
   useLayoutEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

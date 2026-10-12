@@ -11,11 +11,7 @@ export default function DonutChart({ labels, values }) {
       {
         data: values,
         backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length]),
-<<<<<<< HEAD
         borderWidth: 3,
-=======
-        borderWidth: 2,
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
         borderColor: chartColors.panel,
       },
     ],
@@ -24,7 +20,6 @@ export default function DonutChart({ labels, values }) {
     plugins: {
       legend: {
         position: 'bottom',
-<<<<<<< HEAD
         labels: { boxWidth: 8, boxHeight: 8, usePointStyle: true, font: { size: 12 }, color: chartColors.text, padding: 14 },
       },
     },
@@ -34,17 +29,6 @@ export default function DonutChart({ labels, values }) {
   };
   return (
     <div className="h-[240px]">
-=======
-        labels: { boxWidth: 10, font: { size: 11 }, color: chartColors.text },
-      },
-    },
-    maintainAspectRatio: false,
-    cutout: '62%',
-    animation: { duration: 300 },
-  };
-  return (
-    <div className="h-[190px]">
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
       <Doughnut data={data} options={options} />
     </div>
   );

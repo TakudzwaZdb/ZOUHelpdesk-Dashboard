@@ -36,12 +36,9 @@ if (!DEMO_MODE) {
     waitForConnections: true,
     connectionLimit: 5,
     connectTimeout: 5000,
-<<<<<<< HEAD
     decimalNumbers: true,       // SUM()/AVG() come back as DECIMAL -> return real numbers, not strings
     supportBigNumbers: true,
     bigNumberStrings: false,
-=======
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
   });
 
   // Fail loudly and immediately if the DB is unreachable, rather than
@@ -57,7 +54,6 @@ if (!DEMO_MODE) {
 // q(sql, params) -> rows, shared by every function in queries/osticket.js
 async function q(sql, params) {
   const [rows] = await pool.query(sql, params || []);
-<<<<<<< HEAD
   // Belt and braces: SUM() over a DECIMAL/BigInt can still arrive as a string
   // ("70"), and "0"+"70"+"16" concatenates instead of adding. Make every
   // numeric-looking value in a row a real JS number.
@@ -71,9 +67,6 @@ async function q(sql, params) {
     }
     return o;
   });
-=======
-  return rows;
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 }
 
 // Fetch a named dataset either from the live DB or the demo generator,
@@ -152,11 +145,8 @@ const routes = {
   '/api/department-comparison': 'department_comparison',
   '/api/category-comparison': 'category_comparison',
   '/api/agent-comparison': 'agent_comparison',
-<<<<<<< HEAD
   '/api/resolution-pace': 'resolution_pace',
   '/api/ticket-keywords': 'ticket_keywords',
-=======
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 };
 
 for (const [route, key] of Object.entries(routes)) {
@@ -181,8 +171,4 @@ app.get(/^(?!\/api\/).*/, (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Helpdesk dashboard listening on :${PORT} (DEMO_MODE=${DEMO_MODE})`);
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a

@@ -5,11 +5,7 @@ export function Metric({ value, label, loading, size = 'lg' }) {
   return (
     <div className="flex-1 min-w-[110px]">
       <div
-<<<<<<< HEAD
         className={`${sizeClass} font-bold leading-none ${loading ? 'skeleton-text' : ''}`}
-=======
-        className={`${sizeClass} font-extrabold leading-none font-serif ${loading ? 'skeleton-text' : ''}`}
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
       >
         {loading ? '000' : (value ?? '–')}
       </div>
@@ -18,7 +14,6 @@ export function Metric({ value, label, loading, size = 'lg' }) {
   );
 }
 
-<<<<<<< HEAD
 export function KpiCard({ accent, value, label, sub, loading, wide }) {
   const borderColor = {
     blue: 'text-blue',
@@ -46,23 +41,6 @@ export function KpiCard({ accent, value, label, sub, loading, wide }) {
         {loading ? '000' : (value ?? '–')}
       </div>
       {sub && <div className="text-[11.5px] text-slate mt-2 leading-snug">{sub}</div>}
-=======
-export function KpiCard({ accent, value, label, loading }) {
-  const borderColor = {
-    blue: 'border-t-blue',
-    red: 'border-t-red',
-    gold: 'border-t-gold',
-    green: 'border-t-green',
-  }[accent];
-  return (
-    <div
-      className={`bg-panel border border-panelBorder ${borderColor} border-t-4 rounded-[10px] px-4 sm:px-[18px] py-3.5 sm:py-4 shadow-sm transition-colors`}
-    >
-      <div className={`text-[28px] sm:text-[36px] font-extrabold leading-none font-serif ${loading ? 'skeleton-text' : ''}`}>
-        {loading ? '000' : (value ?? '–')}
-      </div>
-      <div className="text-[11.5px] sm:text-[12.5px] text-slate mt-1.5 font-semibold tracking-wide">{label}</div>
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
     </div>
   );
 }

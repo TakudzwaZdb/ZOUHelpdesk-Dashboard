@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 import { useEffect, useRef, useState } from 'react';
 import { getJSON } from '../api.js';
 
