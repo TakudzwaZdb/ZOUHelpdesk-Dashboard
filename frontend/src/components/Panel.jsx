@@ -9,9 +9,15 @@ export default function Panel({ title, span = 2, stale, loading, children }) {
   const spanClass = span === 4 ? 'col-span-1 sm:col-span-2 lg:col-span-4' : 'col-span-1 lg:col-span-2';
   return (
     <div
+<<<<<<< HEAD
       className={`${spanClass} relative bg-panel border border-panelBorder rounded-xl p-4 sm:p-5 transition-colors`}
     >
       <h2 className="panel-title text-[11px] sm:text-[11.5px] font-semibold mb-4 text-slate flex justify-between items-center gap-2">
+=======
+      className={`${spanClass} relative bg-panel border border-panelBorder rounded-[10px] p-3.5 sm:p-4 shadow-sm transition-colors`}
+    >
+      <h2 className="text-[13.5px] sm:text-[14.5px] font-semibold mb-2.5 text-ink2 flex justify-between items-center gap-2">
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
         <span>{title}</span>
         {stale && <span className="text-[10px] font-semibold text-red shrink-0">⚠ no data</span>}
       </h2>

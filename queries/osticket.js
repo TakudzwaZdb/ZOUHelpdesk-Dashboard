@@ -46,6 +46,7 @@ async function summary(q) {
     JOIN ${PREFIX}ticket_status s ON s.id = t.status_id
     WHERE s.name = 'Resolved'
   `);
+<<<<<<< HEAD
   const [closedRow] = await q(`
     SELECT COUNT(*) c FROM ${PREFIX}ticket t
     JOIN ${PREFIX}ticket_status s ON s.id = t.status_id
@@ -75,6 +76,14 @@ async function resolution_pace(q) {
   return { resolved, total, resolved_pct, target_pct: TARGET_PCT };
 }
 
+=======
+  return {
+    open: openRow.c, overdue: overdueRow.c, pending: pendingRow.c,
+    resolved: resolvedRow.c, total_active: openRow.c,
+  };
+}
+
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 async function volume(q) {
   const [t] = await q(`SELECT COUNT(*) c FROM ${PREFIX}ticket WHERE DATE(created) = CURDATE()`);
   const [w] = await q(`SELECT COUNT(*) c FROM ${PREFIX}ticket WHERE YEARWEEK(created, 1) = YEARWEEK(CURDATE(), 1)`);
@@ -85,10 +94,17 @@ async function volume(q) {
 
 async function by_department(q) {
   return q(`
+<<<<<<< HEAD
     SELECT COALESCE(d.name, 'No department') AS label, COUNT(*) AS count
     FROM ${PREFIX}ticket t
     LEFT JOIN ${PREFIX}department d ON d.id = t.dept_id
     GROUP BY d.id, d.name ORDER BY count DESC
+=======
+    SELECT d.name AS label, COUNT(*) AS count
+    FROM ${PREFIX}ticket t
+    JOIN ${PREFIX}department d ON d.id = t.dept_id
+    GROUP BY d.name ORDER BY count DESC
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
   `);
 }
 
@@ -235,15 +251,25 @@ async function department_comparison(q) {
   // Overdue = currently open AND past its SLA (isoverdue flag).
   // Resolved = closed with status 'Resolved'.
   return q(`
+<<<<<<< HEAD
     SELECT COALESCE(d.name, 'No department') AS label,
+=======
+    SELECT d.name AS label,
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
       COUNT(*) AS total,
       SUM(CASE WHEN s.state = 'open' AND (t.staff_id > 0 OR t.team_id > 0) THEN 1 ELSE 0 END) AS assigned,
       SUM(CASE WHEN s.name = 'Resolved' THEN 1 ELSE 0 END) AS resolved,
       SUM(CASE WHEN s.state = 'open' AND t.isoverdue = 1 THEN 1 ELSE 0 END) AS overdue
     FROM ${PREFIX}ticket t
+<<<<<<< HEAD
     LEFT JOIN ${PREFIX}department d ON d.id = t.dept_id
     JOIN ${PREFIX}ticket_status s ON s.id = t.status_id
     GROUP BY d.id, d.name ORDER BY total DESC
+=======
+    JOIN ${PREFIX}department d ON d.id = t.dept_id
+    JOIN ${PREFIX}ticket_status s ON s.id = t.status_id
+    GROUP BY d.name ORDER BY total DESC
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
   `);
 }
 
@@ -264,6 +290,7 @@ async function category_comparison(q) {
 }
 
 async function agent_comparison(q) {
+<<<<<<< HEAD
   // Total = all tickets ever assigned to this agent (any status). Tickets with
   // no individual owner are grouped as "Unassigned" so the agent totals add up
   // to ALL tickets (and overdue adds up to the Overdue KPI).
@@ -271,10 +298,18 @@ async function agent_comparison(q) {
     SELECT COALESCE(CONCAT(st.firstname, ' ', st.lastname), 'Unassigned') AS label,
       COUNT(*) AS total,
       SUM(CASE WHEN s.state = 'open' AND st.staff_id IS NOT NULL THEN 1 ELSE 0 END) AS assigned,
+=======
+  // Total = all tickets ever assigned to this agent (any status).
+  return q(`
+    SELECT CONCAT(st.firstname, ' ', st.lastname) AS label,
+      COUNT(*) AS total,
+      SUM(CASE WHEN s.state = 'open' THEN 1 ELSE 0 END) AS assigned,
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
       SUM(CASE WHEN s.name = 'Resolved' THEN 1 ELSE 0 END) AS resolved,
       SUM(CASE WHEN s.state = 'open' AND t.isoverdue = 1 THEN 1 ELSE 0 END) AS overdue
     FROM ${PREFIX}ticket t
     JOIN ${PREFIX}ticket_status s ON s.id = t.status_id
+<<<<<<< HEAD
     LEFT JOIN ${PREFIX}staff st ON st.staff_id = t.staff_id
     GROUP BY st.staff_id, st.firstname, st.lastname ORDER BY total DESC
   `);
@@ -306,10 +341,20 @@ async function ticket_keywords(q) {
   return [...freq.entries()].map(([text, count]) => ({ text, count })).sort((a, b) => b.count - a.count).slice(0, 60);
 }
 
+=======
+    JOIN ${PREFIX}staff st ON st.staff_id = t.staff_id
+    GROUP BY st.staff_id ORDER BY total DESC
+  `);
+}
+
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 module.exports = {
   summary, volume, by_department, by_category, by_source, assignment,
   agent_workload, resolved_per_agent, response_times, sla_compliance,
   trends_hourly, trends_daily, channel_mix,
   department_comparison, category_comparison, agent_comparison,
+<<<<<<< HEAD
   resolution_pace, ticket_keywords,
+=======
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 };

@@ -6,6 +6,7 @@ import {
   LineElement,
   PointElement,
   ArcElement,
+<<<<<<< HEAD
   BarController,
   LineController,
   DoughnutController,
@@ -15,6 +16,11 @@ import {
   Filler,
   RadarController,
   RadialLinearScale,
+=======
+  Tooltip,
+  Legend,
+  Filler,
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
 } from 'chart.js';
 
 ChartJS.register(
@@ -24,6 +30,7 @@ ChartJS.register(
   LineElement,
   PointElement,
   ArcElement,
+<<<<<<< HEAD
   BarController,
   LineController,
   DoughnutController,
@@ -46,3 +53,11 @@ ChartJS.defaults.plugins.tooltip.borderWidth = 1;
 ChartJS.defaults.plugins.tooltip.padding = 10;
 ChartJS.defaults.plugins.tooltip.titleColor = '#e8eaf2';
 ChartJS.defaults.plugins.tooltip.bodyColor = '#c7cde0';
+=======
+  Tooltip,
+  Legend,
+  Filler
+);
+
+export const PALETTE = ['#3a6ea5', '#c8952e', '#2f7d55', '#b3413a', '#7a5ea8', '#3d8f9d', '#8a6d3b', '#5b6c8a'];
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a

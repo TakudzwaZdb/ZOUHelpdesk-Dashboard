@@ -2,7 +2,10 @@ import React from 'react';
 import { useTheme } from '../context/ThemeContext.jsx';
 
 const SWATCHES = {
+<<<<<<< HEAD
   infographic: '#21222d',
+=======
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
   light: '#f5f6f9',
   navy: '#16244a',
   dark: '#1a1a20',

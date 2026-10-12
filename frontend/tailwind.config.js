@@ -19,7 +19,10 @@ export default {
         red: 'var(--red)',
         green: 'var(--green)',
         blue: 'var(--blue)',
+<<<<<<< HEAD
         violet: 'var(--violet)',
+=======
+>>>>>>> 812d07d3ece33f5b5111abf9043bd9e94e12176a
       },
       fontFamily: {
         serif: ['"Source Serif 4"', 'serif'],
